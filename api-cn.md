@@ -885,7 +885,7 @@ range取值：
 | ├─ posiQty            | string    | 非必须   |        | 开仓数量           |                   |
 | ├─ openAmt            | string    | 非必须   |        | 开仓金额           |                   |
 | ├─ initMargin         | string    | 非必须   |        | 初始保证金         |                   |
-| ├─ posiStatus         | number    | 非必须   |        | 持仓状态           |                   |
+| ├─ posiStatus         | number    | 非必须   |        | 持仓状态：0正常1禁止平仓2交割           |                   |
 | ├─ marginType         | number    | 非必须   |        | 保证金类型         |                   |
 | ├─ closeProfitLoss    | string    | 非必须   |        | 已实现盈亏         |                   |
 | ├─ initMargiRate      | string    | 非必须   |        | 初始保证金率       |                   |
