@@ -30,7 +30,8 @@
 | 交易     | 交易类接口     | /api/v1/future/position/isolate          | POST   | 切换仓位模式           | 是       |
 | 交易     | 交易类接口     | /api/v1/future/position/transferMargin   | POST   | 调整保证金率           | 是       |
 | 交易     | 交易类接口     | /api/v1/future/queryForceLower           | GET    | 获取强减队列           | 是       |
-| 交易     | 交易类接口     | /api/v1/future/queryMatch                | GET    | 获取当前成交强减队列   | 是       |
+| 交易     | 交易类接口     | /api/v1/future/queryMatch                | GET    | 获取当前成交强减队列    | 是       |
+| 交易     | 交易类接口     | /api/v1/future/position/adjustModel      | POST   | 调整持仓模式           | 是       |
 
 
 
@@ -892,6 +893,7 @@ range取值：
 | ├─ maintainMarginRate | string    | 非必须   |        | 维持保证金率       |                   |
 | ├─ frozenCloseQty     | string    | 非必须   |        | 冻结平仓数量       |                   |
 | ├─ frozenOpenQty      | string    | 非必须   |        | 冻结开仓数量       |                   |
+| ├─ posiSide           | number    | 非必须   |        | 持仓方向0对冲1多头-1空头       |                   |
 
 ## 3.4 获取用户合约保证金梯度
 
@@ -966,7 +968,7 @@ range取值：
 | orderType      | integer | 必须     |        | 合约委托类型（1（限价），3（市价） ）            |            |
 | positionEffect | number  | 必须     |        | 开平标志（开仓1，平仓2）                         |            |
 | marginType     | number  | 必须     |        | 仓位模式（全仓1，逐仓2）                         |            |
-| marginRate     | string  | 必须     |        | 保证金率（全仓=0，逐仓>=0）                      |            |
+| marginRate     | string  | 必须     |        | 保证金率（全仓: >=0，0：取合约配置值，逐仓: >0 )  |            |
 
 ### 返回数据
 
@@ -1015,7 +1017,7 @@ range取值：
 | ├─ symbol        | string    | 非必须   |        | 合约名称                       |                   |
 | ├─positionEffect | number    | 必须     |        | 开平标志，1开仓，2平仓         |                   |
 | ├─ marginType    | number    | 必须     |        | 保证金类型，1全仓，2逐仓       |                   |
-| ├─ initRate      | string    | 非必须   |        | 保证金率，全仓时0，逐仓时>0    |                   |
+| ├─ initRate      | string    | 非必须   |        | 保证金率，全仓：>=0，0：取合约配置值，逐仓：>0    |                   |
 
 ### 返回数据
 
@@ -1201,6 +1203,8 @@ range取值：
 | ├─positionEffect | number    | 非必须   |        | 开平标志（1开仓 2平仓）                                      |                   |
 | ├─marginType     | number    | 非必须   |        | 仓位模式（1、全仓，2：逐仓）                                 |                   |
 | ├─fcOrderId      | string    | 非必须   |        | 强平委托号，非空时为强平委托                                 |                   |
+| ├─deltaPrice     | string    | 非必须   |        | 标记价格与委托价格价差                                      |                   |
+| ├─frozenPrice    | string    | 非必须   |        | 资金计算价格                                               |                   |
 
 ## 4.8 获取历史委托
 
@@ -1278,6 +1282,7 @@ range取值：
 | contractId     | string | 必须     |        | 交易对ID                 |          |
 | initMarginRate | string | 非必须   |        | 初始保证金率0<${}<=1     |          |
 | marginType     | string | 必须     |        | 保证金类型，全仓1，逐仓2 |          |
+| posiSide       | integer | 非必须  |        | 0：对冲，1：多头，-1：空头。默认：0 |          |
 
 ### 返回数据
 
@@ -1306,6 +1311,7 @@ range取值：
 | ---------- | ------- | -------- | ------ | ------------------------------------------ | -------- |
 | contractId | integer | 非必须   |        | 合约ID                                     |          |
 | margin     | string  | 非必须   |        | 保证金（>0 : 增加保证金，<0 ：减少保证金） |          |
+| posiSide   | integer | 非必须  |        | 0：对冲，1：多头，-1：空头。默认：0 |          |
 
 ### 返回数据
 
@@ -1390,4 +1396,38 @@ range取值：
 | ├─ bid_pnl_type        | null      | 非必须   |        | 买方盈亏类型：0正常成交1正常平仓2强平3强减               |                   |
 | ├─ bid_pnl             | null      | 非必须   |        | 买方平仓盈亏                                             |                   |
 | ├─ ask_pnl_type        | null      | 非必须   |        | 卖方盈亏类型：0正常成交1正常平仓2强平3强减               |                   |
-| ├─ ask_pnl             | null      | 非必须   |        | 卖方平仓盈亏                                             | ``                |
+| ├─ ask_pnl             | null      | 非必须   |        | 卖方平仓盈亏                                             |                 |
+
+
+## 4.13 调整持仓模式
+
+### 基本信息
+
+**Path：** /api/v1/future/position/adjustModel
+
+**Method：** POST
+
+**接口描述：**
+
+### 请求参数
+
+**Headers**
+
+| 参数名称     | 参数值           | 是否必须 | 示例 | 备注 |
+| ------------ | ---------------- | -------- | ---- | ---- |
+| Content-Type | application/json | 是       |      |      |
+
+**Body**
+
+| 名称           | 类型    | 是否必须 | 默认值 | 备注                                             | 其他信息   |
+| -------------- | ------- | -------- | ------ | ------------------------------------------------ | ---------- |
+| currencyId     | integer | 非必须   |        | 货币ID                                         |            |
+| type           | integer | 非必须   |        | 持仓模式，0：对冲，1：双边                       |            |
+
+### 返回数据
+
+| 名称 | 类型   | 是否必须 | 默认值 | 备注               | 其他信息 |
+| ---- | ------ | -------- | ------ | ------------------ | -------- |
+| code | number | 非必须   |        | 0：成功，非0：失败 |          |
+| msg  | string | 非必须   |        | 消息msg            |          |
+| data | object | 非必须   |        | 消息结合           |          |
